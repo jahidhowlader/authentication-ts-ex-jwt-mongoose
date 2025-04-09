@@ -23,7 +23,8 @@ const UserSchema = new Schema<TUser, TUserModel>({
     },
     password: {
         type: String,
-        required: true
+        required: true,
+        select: 0
     },
     role: {
         type: String,
@@ -54,9 +55,13 @@ UserSchema.post('save', async function (doc, next) {
     next()
 })
 
+UserSchema.statics.isPasswordMatched = async function (plainTextPassword, hashedPassword) {
+    return await bcrypt.compare(plainTextPassword, hashedPassword);
+};
+
 // create static method in User model for check user already exists
 UserSchema.statics.isUserExistsByEmail = async function (email: string) {
-    return await User.findOne({ email })
+    return await User.findOne({ email }).select('+password')
 };
 
 export const User = model<TUser, TUserModel>('User', UserSchema)

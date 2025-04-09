@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const userValidationSchema = z.object({
+const createUserValidationSchema = z.object({
 
     body: z.object({
 
@@ -36,6 +36,29 @@ const userValidationSchema = z.object({
     invalid_type_error: "Body Information will json"
 })
 
+const loginValidationSchema = z.object({
+
+    body: z.object({
+
+        email: z.string({
+            required_error: "Email is required",
+            invalid_type_error: "Email will be string"
+        })
+            .email({ message: "Invalid email format" })
+            .trim(),
+
+        password: z.string({
+            required_error: "Password is required",
+            invalid_type_error: "Password will be string"
+        })
+            .min(6, { message: "Password is required" })
+    })
+}, {
+    required_error: 'Body Information is require',
+    invalid_type_error: "Body Information will json"
+})
+
 export const UserValidation = {
-    userValidationSchema
+    createUserValidationSchema,
+    loginValidationSchema
 }

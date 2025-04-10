@@ -6,13 +6,11 @@ import catchAsync from "../utils/catchAsync"
 import status from "http-status";
 import jwt, { JwtPayload } from 'jsonwebtoken'
 
-
 const auth = (...requiredRoles: TUserRole[]) => {
 
     return catchAsync(async (request, response, next) => {
 
         const token = request.headers.authorization;
-
         if (!token) {
             throw new ApiError(status.UNAUTHORIZED, {
                 message: 'You are not authorized!',
@@ -47,11 +45,11 @@ const auth = (...requiredRoles: TUserRole[]) => {
         if (userStatus === 'blocked') {
             throw new ApiError(status.FORBIDDEN, {
                 source: 'Mongoose Error',
-                message: 'This user is blocked ! !'
+                message: 'This user is blocked !!'
             });
         }
 
-        if (requiredRoles && !requiredRoles.includes(user?.role)) {
+        if (!requiredRoles.includes(user?.role)) {
             throw new ApiError(
                 status.UNAUTHORIZED,
                 {
@@ -67,3 +65,9 @@ const auth = (...requiredRoles: TUserRole[]) => {
 }
 
 export default auth
+
+/*
+admin
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImphaGlkMTIzQGdtYWlsLmNvbSIsInBhc3N3b3JkIjoiMTIzNDU2IiwiaWF0IjoxNzQ0MjgwNzY0LCJleHAiOjE3NDQyODQzNjR9.bFWKOvHfr_yZZssvRGuTpPArKaSYbOn_79AnrP4V0Lk
+
+*/

@@ -4,6 +4,7 @@ import { TLogin, TUser } from "./user.interface";
 import { UserService } from "./user.service";
 
 const createUser = catchAsync(
+
     async (request, response) => {
         const userData: TUser = request.body
         const result = await UserService.createUserIntoDB(userData, 'user')
@@ -12,6 +13,7 @@ const createUser = catchAsync(
 )
 
 const createAdmin = catchAsync(
+
     async (request, response) => {
         const userData: TUser = request.body
         const result = await UserService.createUserIntoDB(userData, 'admin')
@@ -20,6 +22,7 @@ const createAdmin = catchAsync(
 )
 
 const createMerchant = catchAsync(
+
     async (request, response) => {
         const userData: TUser = request.body
         const result = await UserService.createUserIntoDB(userData, 'merchant')
@@ -28,6 +31,7 @@ const createMerchant = catchAsync(
 )
 
 const logInUser = catchAsync(
+
     async (request, response) => {
         const { email, password }: TLogin = request.body
         const credentials = {
@@ -39,9 +43,22 @@ const logInUser = catchAsync(
 )
 
 const getAllUser = catchAsync(
+
     async (request, response) => {
         const result = await UserService.getAllUserFromDB()
         handleSuccessResponse(request, response, result, 'User create successfully..')
+    }
+)
+
+const updateSingleUser = catchAsync(
+
+    async (request, response) => {
+
+        const authenticateEmail = request.user.email
+        const paramsEmail = request.params.email
+
+        const result = await UserService.updateSingleUserIntoDB(authenticateEmail, paramsEmail)
+        handleSuccessResponse(request, response, result, 'HA HA HA ..')
     }
 )
 
@@ -50,5 +67,6 @@ export const UserController = {
     createAdmin,
     createMerchant,
     logInUser,
-    getAllUser
+    getAllUser,
+    updateSingleUser
 }

@@ -77,8 +77,22 @@ const getAllUserFromDB = async () => {
     return result
 }
 
+const updateSingleUserIntoDB = async (authenticateEmail: string, paramsEmail: string) => {
+
+    if (authenticateEmail !== paramsEmail) {
+        throw new ApiError(status.FORBIDDEN, {
+            source: 'Validation Error',
+            message: 'User does not match !!'
+        });
+    }
+
+    const user = await User.findOne({ email: paramsEmail })
+    return result
+}
+
 export const UserService = {
     createUserIntoDB,
     getAllUserFromDB,
-    userLoginWithDB
+    userLoginWithDB,
+    updateSingleUserIntoDB
 }

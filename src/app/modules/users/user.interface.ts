@@ -1,6 +1,7 @@
 import { Model } from "mongoose";
+import { USER_ROLE } from "./user.constant";
 
-export type TUserRole = 'admin' | 'user' | 'merchant';
+export type TUserRole = keyof typeof USER_ROLE;
 export type TUserStatus = 'active' | 'blocked';
 export type TLogin = {
     email: string

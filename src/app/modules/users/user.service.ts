@@ -87,7 +87,7 @@ const updateSingleUserIntoDB = async (authenticateEmail: string, paramsEmail: st
     }
 
     const user = await User.findOne({ email: paramsEmail })
-    return result
+    return user
 }
 
 export const UserService = {

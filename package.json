@@ -9,8 +9,18 @@
     "start": "ts-node-dev --respawn --transpile-only src/server.ts",
     "start:prd": "node ./dist/server.js"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "authentication",
+    "JWT",
+    "node.js",
+    "express",
+    "zod",
+    "bcript",
+    "mongodb",
+    "mongoose",
+    "mern authentication"
+  ],
+  "author": "Jahid Howlader",
   "license": "ISC",
   "description": "",
   "dependencies": {

@@ -3,7 +3,7 @@ import rateLimit, { Options } from 'express-rate-limit';
 
 const rateLimiter = rateLimit({
     windowMs: 5 * 60 * 1000, // minutes
-    max: 5, // Limit to requests per windowMs
+    max: 100, // Limit to requests per windowMs
     handler: (req: Request, res: Response, next: NextFunction, options: Options) => {
 
         const timeLeftInMinutes = Math.ceil((options.windowMs - (Date.now() % options.windowMs)) / 60000);

@@ -10,15 +10,18 @@ A simple user authentication and management system built with **Zod**, **Mongoos
     cd <repository_directory>
 
 2. Create a .env file in the root directory and configure the following variables:
+    ```bash
     PORT=<your_port_here>
     DATABASE_URL=<your_mongodb_connection_string>
     BCRIPT_SALT=<your_bcrypt_salt>
     JWT_SECRET=<your_jwt_secret>
 
 3. Install the dependencies:
+    ```bash
     npm install
 
 4. Run the application:
+    ```bash
     npm start
 
 ---

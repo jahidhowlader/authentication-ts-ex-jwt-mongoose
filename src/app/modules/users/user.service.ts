@@ -60,31 +60,14 @@ const userLoginWithDB = async (payload: TLogin) => {
     }
 
     const checkPasswordMatch = await User.isPasswordMatched(payload?.password, user?.password)
-    console.log({
-        checkPasswordMatch
-    });
-
-
-    // if () {
-
-    //     console.log({
-    //         isDeleted,
-    //         userStatus,
-    //         test: !(await User.isPasswordMatched(payload?.password, user?.password))
-    //     });
-
-    //     throw new ApiError(status.FORBIDDEN, {
-    //         source: 'Mongoose Error',
-    //         message: 'Password does not matched'
-    //     });
-    // }
+    if (!checkPasswordMatch) {
+        throw new ApiError(status.FORBIDDEN, {
+            source: 'Mongoose Error',
+            message: 'Password does not match !!'
+        });
+    }
 
     const result = jwt.sign(payload, config.JWT_SECRET, { expiresIn: 60 * 60 });
-
-    console.log({
-        result
-    });
-
     return result
 }
 

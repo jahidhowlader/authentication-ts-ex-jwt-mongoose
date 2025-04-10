@@ -9,7 +9,7 @@ const router = express.Router();
 router
     .get(
         '/',
-        auth(),
+        auth('user'),
         UserController.getAllUser
     )
     .post(

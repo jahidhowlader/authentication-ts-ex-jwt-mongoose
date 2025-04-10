@@ -33,7 +33,7 @@ const logInUser = catchAsync(
         const credentials = {
             email, password
         }
-        const accessToken = UserService.userLoginWithDB(credentials)
+        const accessToken = await UserService.userLoginWithDB(credentials)
         handleSuccessResponse(request, response, accessToken, 'Login successfully..')
     }
 )

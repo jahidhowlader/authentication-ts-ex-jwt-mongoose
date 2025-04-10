@@ -8,11 +8,6 @@ export const globalErrorHandler: ErrorRequestHandler = (error: any, request: Req
 
     const startTime = request.requestStartTime as number;
 
-    console.log({
-        errorhaiosdh: error
-    });
-
-
     // If it's an instance of ApiError, use the custom message and status code
     if (error instanceof ApiError) {
         const {

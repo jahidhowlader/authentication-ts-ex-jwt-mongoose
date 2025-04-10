@@ -59,7 +59,7 @@ const auth = (...requiredRoles: TUserRole[]) => {
             );
         }
 
-        request.user = decoded
+        request.user = user
         next()
     })
 }

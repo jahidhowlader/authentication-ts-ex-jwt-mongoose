@@ -24,7 +24,42 @@ const createUserValidationSchema = z.object({
         })
             .min(6, { message: "Password is required" }),
 
-        role: z.enum(['user', 'merchant', 'admin'], { message: "Role must be one of 'user', 'merchant', or 'admin'" })
+        role: z.enum(
+            ['user', 'merchant', 'admin'],
+            { message: "Role must be one of 'user', 'merchant', or 'admin'" }
+        )
+            .optional()
+
+    }, {
+        required_error: 'User Information is require',
+        invalid_type_error: "User Information will json"
+    })
+}, {
+    required_error: 'Body Information is require',
+    invalid_type_error: "Body Information will json"
+})
+
+const updateUserValidationSchema = z.object({
+
+    body: z.object({
+
+        name: z.string({
+            required_error: "Username is required",
+            invalid_type_error: "Username will be string"
+        })
+            .max(15, { message: "Username must be less then 15 characters" })
+            .trim()
+            .optional(),
+
+        status: z.enum(
+            ['active', 'blocked'],
+            { message: "Status must be one of 'active' or 'blocked'" }
+        )
+            .optional(),
+
+        isDeleted: z.boolean({
+            invalid_type_error: 'Is deleted field must be boolean data type'
+        })
             .optional()
 
     }, {
@@ -60,5 +95,6 @@ const loginValidationSchema = z.object({
 
 export const UserValidation = {
     createUserValidationSchema,
+    updateUserValidationSchema,
     loginValidationSchema
 }

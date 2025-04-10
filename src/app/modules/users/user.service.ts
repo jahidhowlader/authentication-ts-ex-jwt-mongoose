@@ -59,6 +59,7 @@ const userLoginWithDB = async (payload: TLogin) => {
         });
     }
 
+    // check Body password and BD password are same
     const checkPasswordMatch = await User.isPasswordMatched(payload?.password, user?.password)
     if (!checkPasswordMatch) {
         throw new ApiError(status.FORBIDDEN, {
@@ -67,27 +68,47 @@ const userLoginWithDB = async (payload: TLogin) => {
         });
     }
 
+    // create token with payload data and return access token
     const result = jwt.sign(payload, config.JWT_SECRET, { expiresIn: 60 * 60 });
     return result
 }
 
 const getAllUserFromDB = async () => {
 
+    // Get All user data from DB and return
     const result = await User.find()
     return result
 }
 
-const updateSingleUserIntoDB = async (authenticateEmail: string, paramsEmail: string) => {
+const updateSingleUserIntoDB = async (decodedEmail: string, paramsEmail: string, body: Partial<TUser>) => {
 
-    if (authenticateEmail !== paramsEmail) {
+    // check params email and decoded email are same 
+    if (decodedEmail !== paramsEmail) {
         throw new ApiError(status.FORBIDDEN, {
             source: 'Validation Error',
             message: 'User does not match !!'
         });
     }
 
-    const user = await User.findOne({ email: paramsEmail })
-    return user
+    // filter data field which is given update 
+    const updateUserData = {
+        name: body.name,
+        status: body.status,
+        delete: body.isDeleted
+    }
+
+    // User data updated with DB and return new user data
+    const result = await User.findOneAndUpdate(
+        { email: paramsEmail },
+        {
+            $set: updateUserData
+        },
+        { new: true, runValidators: true }
+        // new: true means By default findOneAndUpdate() return old data new:true mean return new data
+        // runValidators: true means By default findOneAndUpdate() do not check validation rules (schema level validation) ## runValidators: true mongoose schema validation enforce 
+    )
+
+    return result
 }
 
 export const UserService = {

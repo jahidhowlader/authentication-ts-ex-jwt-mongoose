@@ -54,11 +54,12 @@ const updateSingleUser = catchAsync(
 
     async (request, response) => {
 
-        const authenticateEmail = request.user.email
-        const paramsEmail = request.params.email
+        const decodedData: string = request.user.email
+        const paramsEmail: string = request.params.email
+        const body: Partial<TUser> = request.body
 
-        const result = await UserService.updateSingleUserIntoDB(authenticateEmail, paramsEmail)
-        handleSuccessResponse(request, response, result, 'HA HA HA ..')
+        const result = await UserService.updateSingleUserIntoDB(decodedData, paramsEmail, body)
+        handleSuccessResponse(request, response, result, 'User updated successfully...')
     }
 )
 

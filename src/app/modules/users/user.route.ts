@@ -33,9 +33,10 @@ router
         validateRequest(UserValidation.createUserValidationSchema),
         UserController.createMerchant
     )
-    .get(
+    .patch(
         '/:email',
         auth(USER_ROLE.admin, USER_ROLE.user),
+        validateRequest(UserValidation.updateUserValidationSchema),
         UserController.updateSingleUser
     )
 

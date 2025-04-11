@@ -74,6 +74,14 @@ A simple user authentication and management system built with **Zod**, **Mongoos
 - **Node.js**
 - **Express.js**
 - **MongoDB with Mongoose**
+  - Used **pre hooks** to:
+    - Filter out soft-deleted users on `find` and `findOne` queries.
+    - Hash passwords before saving a new user.
+  - Used **post hook** to:
+    - Remove password from the user object after saving to enhance security.
+  - Implemented **static methods** to:
+    - Check if a user exists by email (`isUserExistsByEmail`).
+    - Match passwords during login (`isPasswordMatched`).
 - **Zod** for schema validation
 - **bcrypt** for password hashing
 - **JWT** for authentication

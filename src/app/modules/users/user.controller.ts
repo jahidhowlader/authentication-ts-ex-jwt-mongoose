@@ -1,3 +1,4 @@
+import { JwtPayload } from "jsonwebtoken";
 import catchAsync from "../../utils/catchAsync";
 import { handleSuccessResponse } from "../../utils/responseUtils";
 import { TLogin, TUser } from "./user.interface";
@@ -54,12 +55,23 @@ const updateSingleUser = catchAsync(
 
     async (request, response) => {
 
-        const decodedData: string = request.user.email
         const paramsEmail: string = request.params.email
         const body: Partial<TUser> = request.body
 
-        const result = await UserService.updateSingleUserIntoDB(decodedData, paramsEmail, body)
+        const result = await UserService.updateSingleUserIntoDB(paramsEmail, body)
         handleSuccessResponse(request, response, result, 'User updated successfully...')
+    }
+)
+
+const deleteSingleUser = catchAsync(
+
+    async (request, response) => {
+
+        const paramsEmail: string = request.params.email
+        const decodedData: JwtPayload = request.user
+
+        const result = await UserService.deleteSingleUserFromDB(decodedData, paramsEmail)
+        handleSuccessResponse(request, response, result, 'User deleted successfully...')
     }
 )
 
@@ -69,5 +81,6 @@ export const UserController = {
     createMerchant,
     logInUser,
     getAllUser,
-    updateSingleUser
+    updateSingleUser,
+    deleteSingleUser
 }

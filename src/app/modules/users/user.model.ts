@@ -43,6 +43,18 @@ const UserSchema = new Schema<TUser, TUserModel>({
     timestamps: true
 })
 
+// filter deleted data from bulk
+UserSchema.pre('find', function (next) {
+    this.find({ isDeleted: { $ne: true } });
+    next();
+});
+
+// filter deleted data from single
+UserSchema.pre('findOne', function (next) {
+    this.find({ isDeleted: { $ne: true } });
+    next();
+});
+
 // hash password when user will create
 UserSchema.pre('save', async function (next) {
     this.password = await bcrypt.hash(this.password, Number(config.BCRIPT_SALT))

@@ -35,9 +35,14 @@ router
     )
     .patch(
         '/:email',
-        auth(USER_ROLE.admin, USER_ROLE.user),
+        auth(USER_ROLE.user),
         validateRequest(UserValidation.updateUserValidationSchema),
         UserController.updateSingleUser
+    )
+    .delete(
+        '/:email',
+        auth(USER_ROLE.admin, USER_ROLE.user),
+        UserController.deleteSingleUser
     )
 
 

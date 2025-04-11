@@ -3,68 +3,74 @@ import { TLogin, TUser, TUserRole } from "./user.interface"
 import { User } from "./user.model"
 import { generateId } from "./user.utils"
 import config from "../../config";
-import jwt from 'jsonwebtoken'
+import jwt, { JwtPayload } from 'jsonwebtoken'
 import status from "http-status";
 
-const createUserIntoDB = async (payload: TUser, role: string) => {
+const getAllUserFromDB = async (): Promise<TUser[]> => {
+    const users = await User.find();
+    return users;
+};
 
-    // create new object based on payload
-    const newUser = { ...payload }
-    // check user has exist in DB with email
-    const user = await User.isUserExistsByEmail(payload.email)
+const createUserIntoDB = async (payload: TUser, role: string): Promise<TUser> => {
 
-    // If user has exist then throw error
-    if (user) {
+    //  Check if the user already exists
+    const existingUser = await User.isUserExistsByEmail(payload.email);
+    if (existingUser) {
         throw new ApiError(409, {
-            source: 'Mongoose Error',
-            message: "User has already exist..."
-        })
+            source: 'User Creation',
+            message: 'A user with this email already exists.',
+        });
     }
 
-    // Add ID number and role in newUser
-    newUser.userId = await generateId(role)
-    newUser.role = role as TUserRole
+    //  Generate user ID and assign role
+    const userId = await generateId(role);
+    const newUser: TUser = {
+        ...payload,
+        userId,
+        role: role as TUserRole,
+    };
 
-    // create user in DB and return
-    const result = await User.create(newUser)
-    return result
+    // Create the user in the database
+    const createdUser = await User.create(newUser);
+
+    return createdUser;
 }
 
-const userLoginWithDB = async (payload: TLogin) => {
+const userLoginWithDB = async (payload: TLogin): Promise<string> => {
 
-    // check user has exist in DB with email
-    const user = await User.isUserExistsByEmail(payload.email)
+    const { email, password } = payload;
+
+    //  Check if user exists
+    const user = await User.isUserExistsByEmail(email);
     if (!user) {
         throw new ApiError(status.NOT_FOUND, {
-            source: 'Mongoose Error',
-            message: 'This user is not found !'
+            source: 'User Lookup',
+            message: 'User not found in the database.',
         });
     }
 
-    // checking if the user is already deleted
-    const isDeleted = user?.isDeleted;
-    if (isDeleted) {
+    // Check if user is deleted
+    if (user.isDeleted) {
         throw new ApiError(status.FORBIDDEN, {
-            source: 'Mongoose Error',
-            message: 'This user is deleted !'
+            source: 'Account Status',
+            message: 'User account has been deleted.',
         });
     }
 
-    // checking if the user is blocked
-    const userStatus = user?.status;
-    if (userStatus === 'blocked') {
+    // Check if user is blocked
+    if (user.status === 'blocked') {
         throw new ApiError(status.FORBIDDEN, {
-            source: 'Mongoose Error',
-            message: 'This user is blocked ! !'
+            source: 'Account Status',
+            message: 'User account is blocked.',
         });
     }
 
-    // check Body password and BD password are same
-    const checkPasswordMatch = await User.isPasswordMatched(payload?.password, user?.password)
-    if (!checkPasswordMatch) {
+    //  Verify password
+    const isPasswordValid = await User.isPasswordMatched(password, user.password);
+    if (!isPasswordValid) {
         throw new ApiError(status.FORBIDDEN, {
-            source: 'Mongoose Error',
-            message: 'Password does not match !!'
+            source: 'Authentication',
+            message: 'Incorrect password.',
         });
     }
 
@@ -73,47 +79,83 @@ const userLoginWithDB = async (payload: TLogin) => {
     return result
 }
 
-const getAllUserFromDB = async () => {
+const updateSingleUserIntoDB = async (paramsEmail: string, body: Partial<TUser>): Promise<TUser | null> => {
 
-    // Get All user data from DB and return
-    const result = await User.find()
-    return result
-}
-
-const updateSingleUserIntoDB = async (decodedEmail: string, paramsEmail: string, body: Partial<TUser>) => {
+    // Check if the user exists
+    const user = await User.isUserExistsByEmail(paramsEmail);
+    if (!user) {
+        throw new ApiError(status.NOT_FOUND, {
+            source: 'User Lookup',
+            message: 'User not found in the database.',
+        });
+    }
 
     // check params email and decoded email are same 
-    if (decodedEmail !== paramsEmail) {
+    if (user?.email !== paramsEmail) {
         throw new ApiError(status.FORBIDDEN, {
             source: 'Validation Error',
             message: 'User does not match !!'
         });
     }
 
-    // filter data field which is given update 
-    const updateUserData = {
-        name: body.name,
-        status: body.status,
-        delete: body.isDeleted
+    //  Filter valid fields to update
+    const allowedFields = ['name', 'status', 'isDeleted'] as const;
+    const filteredUpdateFields: Partial<TUser> = {};
+
+    for (const key of allowedFields) {
+        if (body[key] !== undefined) {
+            (filteredUpdateFields[key] as TUser[keyof TUser]) = body[key];
+        }
     }
 
-    // User data updated with DB and return new user data
-    const result = await User.findOneAndUpdate(
+    // Update user in the DB and return the updated document
+    const updatedUser = await User.findOneAndUpdate(
         { email: paramsEmail },
-        {
-            $set: updateUserData
-        },
+        { $set: filteredUpdateFields },
         { new: true, runValidators: true }
         // new: true means By default findOneAndUpdate() return old data new:true mean return new data
         // runValidators: true means By default findOneAndUpdate() do not check validation rules (schema level validation) ## runValidators: true mongoose schema validation enforce 
-    )
+    );
 
-    return result
+    return updatedUser;
+}
+
+const deleteSingleUserFromDB = async (decodedData: JwtPayload, paramsEmail: string): Promise<TUser | null> => {
+
+    const { email: decodedEmail, role } = decodedData;
+
+    // Check if user exists in the database
+    const user = await User.isUserExistsByEmail(paramsEmail);
+    if (!user) {
+        throw new ApiError(status.NOT_FOUND, {
+            source: 'User Lookup',
+            message: 'User not found in the database.',
+        });
+    }
+
+    //  Authorization check (non-admins can only delete themselves)
+    const isNotAdminAndMismatch = role !== 'admin' && decodedEmail !== paramsEmail;
+    if (isNotAdminAndMismatch) {
+        throw new ApiError(status.FORBIDDEN, {
+            source: 'Authorization',
+            message: 'You are not authorized to delete this user.',
+        });
+    }
+
+    //  Soft delete the user (mark as deleted)
+    const updatedUser = await User.findOneAndUpdate(
+        { email: paramsEmail },
+        { $set: { isDeleted: true } },
+        { new: true }
+    );
+
+    return updatedUser
 }
 
 export const UserService = {
     createUserIntoDB,
     getAllUserFromDB,
     userLoginWithDB,
-    updateSingleUserIntoDB
+    updateSingleUserIntoDB,
+    deleteSingleUserFromDB
 }

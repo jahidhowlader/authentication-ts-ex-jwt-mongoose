@@ -1,5 +1,5 @@
 import config from "../config";
-import { ApiError } from "../errors/ApiError";
+import { AppError } from "../errors/AppError";
 import { TUserRole } from "../modules/users/user.interface";
 import { User } from "../modules/users/user.model";
 import catchAsync from "../utils/catchAsync"
@@ -12,11 +12,7 @@ const auth = (...requiredRoles: TUserRole[]) => {
 
         const token = request.headers.authorization;
         if (!token) {
-            throw new ApiError(status.UNAUTHORIZED, {
-                message: 'You are not authorized!',
-                source: 'middleware'
-
-            });
+            throw new AppError(status.UNAUTHORIZED, 'Custom Error: JWT', 'You are not authorized!');
         }
 
         // If token will verified then get user data or error which is handled by jwt
@@ -25,38 +21,24 @@ const auth = (...requiredRoles: TUserRole[]) => {
         // check user has exist in DB with email
         const user = await User.isUserExistsByEmail(decoded?.email)
         if (!user) {
-            throw new ApiError(status.NOT_FOUND, {
-                source: 'Mongoose Error',
-                message: 'This user is not found !'
-            });
+            throw new AppError(status.NOT_FOUND, 'Custom Error', 'This user is not found !');
         }
 
         // checking if the user is already deleted
         const isDeleted = user?.isDeleted;
         if (isDeleted) {
-            throw new ApiError(status.FORBIDDEN, {
-                source: 'Mongoose Error',
-                message: 'This user is deleted !'
-            });
+            throw new AppError(status.FORBIDDEN, 'Custom Error', 'This user is deleted !');
         }
 
         // checking if the user is blocked
         const userStatus = user?.status;
         if (userStatus === 'blocked') {
-            throw new ApiError(status.FORBIDDEN, {
-                source: 'Mongoose Error',
-                message: 'This user is blocked !!'
-            });
+            throw new AppError(status.FORBIDDEN, 'Custom Error', 'This user is blocked !!');
         }
 
         if (!requiredRoles.includes(user?.role)) {
-            throw new ApiError(
-                status.UNAUTHORIZED,
-                {
-                    source: 'JWT Error',
-                    message: 'You are not authorized!!'
-                }
-            );
+            throw new AppError(
+                status.UNAUTHORIZED, 'Custom Error', 'You are not authorized!!');
         }
 
         request.user = user
@@ -65,9 +47,3 @@ const auth = (...requiredRoles: TUserRole[]) => {
 }
 
 export default auth
-
-/*
-admin
-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImphaGlkMTIzQGdtYWlsLmNvbSIsInBhc3N3b3JkIjoiMTIzNDU2IiwiaWF0IjoxNzQ0MjgwNzY0LCJleHAiOjE3NDQyODQzNjR9.bFWKOvHfr_yZZssvRGuTpPArKaSYbOn_79AnrP4V0Lk
-
-*/

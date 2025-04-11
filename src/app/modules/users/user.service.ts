@@ -1,4 +1,4 @@
-import { ApiError } from "../../errors/ApiError"
+import { AppError } from "../../errors/AppError"
 import { TLogin, TUser, TUserRole } from "./user.interface"
 import { User } from "./user.model"
 import { generateId } from "./user.utils"
@@ -16,10 +16,7 @@ const createUserIntoDB = async (payload: TUser, role: string): Promise<TUser> =>
     //  Check if the user already exists
     const existingUser = await User.isUserExistsByEmail(payload.email);
     if (existingUser) {
-        throw new ApiError(409, {
-            source: 'User Creation',
-            message: 'A user with this email already exists.',
-        });
+        throw new AppError(409, 'Custom Error', 'A user with this email already exists.');
     }
 
     //  Generate user ID and assign role
@@ -43,35 +40,23 @@ const userLoginWithDB = async (payload: TLogin): Promise<string> => {
     //  Check if user exists
     const user = await User.isUserExistsByEmail(email);
     if (!user) {
-        throw new ApiError(status.NOT_FOUND, {
-            source: 'User Lookup',
-            message: 'User not found in the database.',
-        });
+        throw new AppError(status.NOT_FOUND, 'Custom Error', 'User not found in the database.');
     }
 
     // Check if user is deleted
     if (user.isDeleted) {
-        throw new ApiError(status.FORBIDDEN, {
-            source: 'Account Status',
-            message: 'User account has been deleted.',
-        });
+        throw new AppError(status.FORBIDDEN, 'Custom Error', 'User account has been deleted.');
     }
 
     // Check if user is blocked
     if (user.status === 'blocked') {
-        throw new ApiError(status.FORBIDDEN, {
-            source: 'Account Status',
-            message: 'User account is blocked.',
-        });
+        throw new AppError(status.FORBIDDEN, 'Custom Error', 'User account is blocked.');
     }
 
     //  Verify password
     const isPasswordValid = await User.isPasswordMatched(password, user.password);
     if (!isPasswordValid) {
-        throw new ApiError(status.FORBIDDEN, {
-            source: 'Authentication',
-            message: 'Incorrect password.',
-        });
+        throw new AppError(status.FORBIDDEN, 'Custom Error', 'Incorrect password.');
     }
 
     // create token with payload data and return access token
@@ -84,18 +69,12 @@ const updateSingleUserIntoDB = async (decodedData: JwtPayload, paramsEmail: stri
     // Check if the user exists
     const user = await User.isUserExistsByEmail(paramsEmail);
     if (!user) {
-        throw new ApiError(status.NOT_FOUND, {
-            source: 'User Lookup',
-            message: 'User not found in the database.',
-        });
+        throw new AppError(status.NOT_FOUND, 'Custom Error', 'User not found in the database.');
     }
 
     // check params email and decoded email are same 
     if (decodedData?.email !== paramsEmail) {
-        throw new ApiError(status.FORBIDDEN, {
-            source: 'Validation Error',
-            message: 'User does not match !!'
-        });
+        throw new AppError(status.FORBIDDEN, 'Custom Error', 'User does not match !!');
     }
 
     //  Filter valid fields to update
@@ -127,19 +106,13 @@ const deleteSingleUserFromDB = async (decodedData: JwtPayload, paramsEmail: stri
     // Check if user exists in the database
     const user = await User.isUserExistsByEmail(paramsEmail);
     if (!user) {
-        throw new ApiError(status.NOT_FOUND, {
-            source: 'User Lookup',
-            message: 'User not found in the database.',
-        });
+        throw new AppError(status.NOT_FOUND, 'Custom Error', 'User not found in the database.');
     }
 
     //  Authorization check (non-admins can only delete themselves)
     const isNotAdminAndMismatch = role !== 'admin' && decodedEmail !== paramsEmail;
     if (isNotAdminAndMismatch) {
-        throw new ApiError(status.FORBIDDEN, {
-            source: 'Authorization',
-            message: 'You are not authorized to delete this user.',
-        });
+        throw new AppError(status.FORBIDDEN, 'Custom Error', 'You are not authorized to delete this user.');
     }
 
     //  Soft delete the user (mark as deleted)

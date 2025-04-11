@@ -22,7 +22,7 @@ const createUserValidationSchema = z.object({
             required_error: "Password is required",
             invalid_type_error: "Password will be string"
         })
-            .min(6, { message: "Password is required" }),
+            .min(6, { message: "Password must be greater then 6 character" }),
 
         role: z.enum(
             ['user', 'merchant', 'admin'],

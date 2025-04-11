@@ -6,6 +6,7 @@ import rateLimiter from './app/libs/rateLimit';
 import { globalErrorHandler } from './app/middlewares/globalErrorHandler';
 import { notFoundHandler } from './app/middlewares/notFoundHandler';
 import router from './app/modules/routers';
+
 const app: Application = express();
 
 app.use(requestLogger); // logger

@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-escape */
 import { model, Schema } from "mongoose";
 import { TUser, TUserModel } from "./user.interface";
 import config from "../../config";
@@ -19,12 +20,25 @@ const UserSchema = new Schema<TUser, TUserModel>({
         type: String,
         required: true,
         unique: true,
-        trim: true
+        trim: true,
+        lowercase: true,
+        match: [
+            /^\w+([\.+-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,})+$/,
+            'Please fill a valid email address'
+        ]
     },
     password: {
         type: String,
         required: true,
-        select: 0
+        select: 0,
+        // validate: {
+        //     validator: function (value) {
+        //         // At least one lowercase, one uppercase, one digit, one special char
+        //         return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(value);
+        //     },
+        //     message: () =>
+        //         'Password must be at least 8 characters and include uppercase, lowercase, number, and special character.'
+        // }
     },
     role: {
         type: String,

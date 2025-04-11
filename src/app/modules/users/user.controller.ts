@@ -56,9 +56,10 @@ const updateSingleUser = catchAsync(
     async (request, response) => {
 
         const paramsEmail: string = request.params.email
+        const decodedData: JwtPayload = request.user
         const body: Partial<TUser> = request.body
 
-        const result = await UserService.updateSingleUserIntoDB(paramsEmail, body)
+        const result = await UserService.updateSingleUserIntoDB(decodedData, paramsEmail, body)
         handleSuccessResponse(request, response, result, 'User updated successfully...')
     }
 )

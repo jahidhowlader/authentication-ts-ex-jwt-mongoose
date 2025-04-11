@@ -79,7 +79,7 @@ const userLoginWithDB = async (payload: TLogin): Promise<string> => {
     return result
 }
 
-const updateSingleUserIntoDB = async (paramsEmail: string, body: Partial<TUser>): Promise<TUser | null> => {
+const updateSingleUserIntoDB = async (decodedData: JwtPayload, paramsEmail: string, body: Partial<TUser>): Promise<TUser | null> => {
 
     // Check if the user exists
     const user = await User.isUserExistsByEmail(paramsEmail);
@@ -91,7 +91,7 @@ const updateSingleUserIntoDB = async (paramsEmail: string, body: Partial<TUser>)
     }
 
     // check params email and decoded email are same 
-    if (user?.email !== paramsEmail) {
+    if (decodedData?.email !== paramsEmail) {
         throw new ApiError(status.FORBIDDEN, {
             source: 'Validation Error',
             message: 'User does not match !!'

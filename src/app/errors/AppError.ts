@@ -6,9 +6,6 @@ export class AppError extends Error {
         // Enrich customError before calling super()
         const enrichedError = AppError.enrichErrorType(customError);
 
-        console.log({ enrichedError });
-
-
         // Call super early
         super(message);
 

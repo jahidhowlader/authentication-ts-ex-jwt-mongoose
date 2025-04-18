@@ -14,6 +14,7 @@ export interface TUser {
     email: string;
     password: string;
     role: TUserRole;
+    profileImage?:string;
     isDeleted: boolean;
     status: TUserStatus;
 };

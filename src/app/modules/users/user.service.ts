@@ -5,6 +5,7 @@ import { generateId } from "./user.utils"
 import config from "../../config";
 import jwt, { JwtPayload } from 'jsonwebtoken'
 import status from "http-status";
+import mongoose from "mongoose";
 
 const getAllUserFromDB = async (): Promise<TUser[]> => {
     const users = await User.find();
@@ -19,18 +20,37 @@ const createUserIntoDB = async (payload: TUser, role: string): Promise<TUser> =>
         throw new AppError(409, 'Custom Error', 'A user with this email already exists.');
     }
 
-    //  Generate user ID and assign role
-    const userId = await generateId(role);
-    const newUser: TUser = {
-        ...payload,
-        userId,
-        role: role as TUserRole,
-    };
+    const session = await mongoose.startSession();
+    session.startTransaction();
 
-    // Create the user in the database
-    const createdUser = await User.create(newUser);
+    try {
+        //  Generate user ID and assign role
+        const userId = await generateId(role);
+        const newUser: TUser = {
+            ...payload,
+            userId,
+            role: role as TUserRole,
+        };
 
-    return createdUser;
+        // Create the user in the database
+        const createdUser = await User.create([newUser], { session });
+        if (!createdUser.length) {
+            throw new AppError(status.BAD_REQUEST, 'Custom Error', 'Failed to create student');
+        }
+
+        await session.commitTransaction();
+        await session.endSession();
+        return createdUser[0];
+    }
+    catch (error) {
+        await session.abortTransaction();
+        await session.endSession();
+        if (error instanceof Error) {
+            throw new AppError(status.BAD_REQUEST, 'Custom Error', error.message || 'Failed to create user');
+        }
+        // fallback throw if error is not instance of Error
+        throw new AppError(status.BAD_REQUEST, 'Custom Error', 'Unknown error occurred');
+    }
 }
 
 const userLoginWithDB = async (payload: TLogin): Promise<string> => {

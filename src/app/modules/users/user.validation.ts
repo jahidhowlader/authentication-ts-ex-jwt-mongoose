@@ -28,8 +28,12 @@ const createUserValidationSchema = z.object({
             ['user', 'merchant', 'admin'],
             { message: "Role must be one of 'user', 'merchant', or 'admin'" }
         )
-            .optional()
+            .optional(),
 
+        profileImage: z.string({
+            invalid_type_error: "Profile Image will be string"
+        })
+            .optional(),
     }, {
         required_error: 'User Information is require',
         invalid_type_error: "User Information will json"

@@ -49,6 +49,10 @@ const UserSchema = new Schema<TUser, TUserModel>({
         enum: ['active', 'blocked'],
         default: 'active'
     },
+    profileImage: {
+        type: String,
+        default: ''
+    },
     isDeleted: {
         type: Boolean,
         default: false

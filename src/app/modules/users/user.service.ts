@@ -119,6 +119,13 @@ const updateSingleUserIntoDB = async (decodedData: JwtPayload, paramsEmail: stri
     return updatedUser;
 }
 
+const changeUserStatus = async (email: string, payload: { status: string }) => {
+    const result = await User.findByIdAndUpdate(email, payload, {
+        new: true,
+    });
+    return result;
+};
+
 const deleteSingleUserFromDB = async (decodedData: JwtPayload, paramsEmail: string): Promise<TUser | null> => {
 
     const { email: decodedEmail, role } = decodedData;
@@ -150,5 +157,6 @@ export const UserService = {
     getAllUserFromDB,
     userLoginWithDB,
     updateSingleUserIntoDB,
+    changeUserStatus,
     deleteSingleUserFromDB
 }

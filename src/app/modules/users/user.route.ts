@@ -8,37 +8,54 @@ import { USER_ROLE } from './user.constant';
 const router = express.Router();
 
 router
+    // ALL USER
     .get(
         '/',
         auth(USER_ROLE.admin),
         UserController.getAllUser
     )
+    // USER LOGIN
     .post(
         '/login',
         validateRequest(UserValidation.loginValidationSchema),
         UserController.logInUser
     )
+    // CREATE DEFAULT USER
     .post(
         '/create-user',
         validateRequest(UserValidation.createUserValidationSchema),
         UserController.createUser
     )
+    // CREATE ADMIN
     .post(
         '/create-admin',
         validateRequest(UserValidation.createUserValidationSchema),
         UserController.createAdmin
     )
+    // CREATE MERCHANT
     .post(
         '/create-merchant',
         validateRequest(UserValidation.createUserValidationSchema),
         UserController.createMerchant
     )
+    // USER STATUS BLOCK BY ADMIN
+    .post(
+        '/change-status/:email',
+        auth(USER_ROLE.admin),
+        validateRequest(UserValidation.changeStatusValidationSchema),
+        UserController.changeUserStatus,
+    )
+    // RESET USER PASSWORD
+
+
+    // UPDATE OWN USER DATA
     .patch(
         '/:email',
         auth(USER_ROLE.user),
         validateRequest(UserValidation.updateUserValidationSchema),
         UserController.updateSingleUser
     )
+    // DELETE OWN PROFILE
     .delete(
         '/:email',
         auth(USER_ROLE.admin, USER_ROLE.user),

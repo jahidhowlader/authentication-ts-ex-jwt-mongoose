@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { UserStatus } from "./user.constant";
 
 const createUserValidationSchema = z.object({
 
@@ -97,8 +98,16 @@ const loginValidationSchema = z.object({
     invalid_type_error: "Body Information will json"
 })
 
+// const foodprint
+const changeStatusValidationSchema = z.object({
+    body: z.object({
+        status: z.enum([...UserStatus] as [string, ...string[]]),
+    }),
+});
+
 export const UserValidation = {
     createUserValidationSchema,
     updateUserValidationSchema,
-    loginValidationSchema
+    loginValidationSchema,
+    changeStatusValidationSchema
 }

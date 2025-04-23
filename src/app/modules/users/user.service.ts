@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { AppError } from "../../errors/AppError"
 import { TLogin, TUser, TUserRole } from "./user.interface"
 import { User } from "./user.model"
@@ -6,13 +7,18 @@ import config from "../../config";
 import jwt, { JwtPayload } from 'jsonwebtoken'
 import status from "http-status";
 import mongoose from "mongoose";
+import { sendImageToCloudinary } from "../../utils/sendImageToCloudinary";
 
 const getAllUserFromDB = async (): Promise<TUser[]> => {
     const users = await User.find();
     return users;
 };
 
-const createUserIntoDB = async (payload: TUser, role: string): Promise<TUser> => {
+const createUserIntoDB = async (
+    file: any,
+    payload: TUser,
+    role: string
+): Promise<TUser> => {
 
     //  Check if the user already exists
     const existingUser = await User.isUserExistsByEmail(payload.email);
@@ -26,10 +32,16 @@ const createUserIntoDB = async (payload: TUser, role: string): Promise<TUser> =>
     try {
         //  Generate user ID and assign role
         const userId = await generateId(role);
+        const imageName = `${userId}${payload?.name}`;
+        const path = file?.path;
+        //send image to cloudinary
+        const { secure_url } = await sendImageToCloudinary(imageName, path) as { secure_url: string };
+
         const newUser: TUser = {
             ...payload,
             userId,
             role: role as TUserRole,
+            profileImage: secure_url || ''
         };
 
         // Create the user in the database

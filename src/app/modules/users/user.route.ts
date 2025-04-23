@@ -27,12 +27,6 @@ router
         // upload.none(),
         upload.single('profileImage'),
         (request: Request, response: Response, next: NextFunction) => {
-            console.log({
-                bodyData: request.body.data,
-                bodyDataJSON: JSON.parse(request.body.data),
-                file: request.file
-            });
-
             request.body = JSON.parse(request.body.data);
             next();
         },

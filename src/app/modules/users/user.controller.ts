@@ -7,7 +7,11 @@ import { UserService } from "./user.service";
 const createUser = catchAsync(
     async (request, response) => {
         const userData: TUser = request.body
-        const result = await UserService.createUserIntoDB(userData, 'user')
+        const result = await UserService.createUserIntoDB(
+            request.file,
+            userData,
+            'user'
+        )
         handleSuccessResponse(request, response, result, 'User create successfully..')
     }
 )
@@ -15,7 +19,11 @@ const createUser = catchAsync(
 const createAdmin = catchAsync(
     async (request, response) => {
         const userData: TUser = request.body
-        const result = await UserService.createUserIntoDB(userData, 'admin')
+        const result = await UserService.createUserIntoDB(
+            request.file,
+            userData,
+            'admin'
+        )
         handleSuccessResponse(request, response, result, 'Admin create successfully..')
     }
 )
@@ -23,7 +31,11 @@ const createAdmin = catchAsync(
 const createMerchant = catchAsync(
     async (request, response) => {
         const userData: TUser = request.body
-        const result = await UserService.createUserIntoDB(userData, 'merchant')
+        const result = await UserService.createUserIntoDB(
+            request.file,
+            userData,
+            'merchant'
+        )
         handleSuccessResponse(request, response, result, 'Merchant create successfully..')
     }
 )

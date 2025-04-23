@@ -15,6 +15,7 @@ app.use(requestTime) // Inject Request Time Start
 
 // parsers
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
 app.use('/api', router)

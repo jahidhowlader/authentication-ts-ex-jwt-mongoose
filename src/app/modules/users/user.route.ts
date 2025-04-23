@@ -1,9 +1,10 @@
-import express from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import validateRequest from '../../middlewares/validateRequest';
 import { UserValidation } from './user.validation';
 import { UserController } from './user.controller';
 import auth from '../../middlewares/auth';
 import { USER_ROLE } from './user.constant';
+import { upload } from '../../utils/sendImageToCloudinary';
 
 const router = express.Router();
 
@@ -23,6 +24,18 @@ router
     // CREATE DEFAULT USER
     .post(
         '/create-user',
+        // upload.none(),
+        upload.single('profileImage'),
+        (request: Request, response: Response, next: NextFunction) => {
+            console.log({
+                bodyData: request.body.data,
+                bodyDataJSON: JSON.parse(request.body.data),
+                file: request.file
+            });
+
+            request.body = JSON.parse(request.body.data);
+            next();
+        },
         validateRequest(UserValidation.createUserValidationSchema),
         UserController.createUser
     )
